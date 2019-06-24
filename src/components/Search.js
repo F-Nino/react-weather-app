@@ -6,15 +6,10 @@ const Search = props => {
       <input
         className="prompt"
         type="text"
-        placeholder="City"
-        onChange={props.handleCityChange}
+        placeholder="Enter Address"
+        onChange={props.handleSearchChange}
       />
-      <input
-        className="prompt"
-        type="text"
-        placeholder="Country"
-        onChange={props.handleCountryChange}
-      />
+
       <input
         type="button"
         value="Get Location"

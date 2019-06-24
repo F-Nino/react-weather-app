@@ -15,18 +15,19 @@ class App extends React.Component {
       weatherData: null,
       locationData: [],
       selectedDay: null,
-      City: "",
-      Country: "",
-      Lat: "",
-      Long: ""
+      searchInput: [],
+      lat: 41,
+      lng: -88,
+      location: ""
     };
     this.fetchWeather = this.fetchWeather.bind(this);
     this.getLocalWeather = this.getLocalWeather.bind(this);
     this.fetchLocation = this.fetchLocation.bind(this);
     this.fetchCurrentCity = this.fetchLocation.bind(this);
     this.onDaySelect = this.onDaySelect.bind(this);
-    this.handleCityChange = this.handleCityChange.bind(this);
-    this.handleCountryChange = this.handleCountryChange.bind(this);
+    this.handleSearchChange = this.handleSearchChange.bind(this);
+    this.updateWeather = this.updateWeather.bind(this);
+
     this.handleClick = this.handleClick.bind(this);
     this.getLatLong = this.getLatLong.bind(this);
   }
@@ -38,15 +39,14 @@ class App extends React.Component {
       <div id="wrapper">
         <div className="ui container">
           <h1 className="ui center white aligned header"> Weather App </h1>
-          <City />
           <div className="search">
             <Search
               name="City"
-              handleCityChange={this.handleCityChange}
-              handleCountryChange={this.handleCountryChange}
+              handleSearchChange={this.handleSearchChange}
               handleClick={this.handleClick}
             />
           </div>
+          <City location={this.state.location} />
           <div className="ui container horizontal segments">
             <WeatherDay
               getLocalWeather={this.getLocalWeather}
@@ -68,18 +68,24 @@ class App extends React.Component {
   }
 
   handleClick = async () => {
-    let searchLocation = await this.getLatLong(
-      this.state.City,
-      this.state.Country
+    let searchLocation = await this.getLatLong(this.state.searchInput);
+    let updatedWeather = await this.updateWeather(
+      this.state.lat,
+      this.state.lng
     );
-    this.setState({ Lat: searchLocation.lat, Long: searchLocation.lng });
+
+    this.setState({
+      lat: searchLocation.data.results[0].geometry.lat,
+      lng: searchLocation.data.results[0].geometry.lng,
+      location: searchLocation.data.results[0].formatted,
+      weatherData: updatedWeather
+    });
+    console.log(this.state);
   };
-  handleCityChange = event => {
-    this.setState({ City: event.target.value });
+  handleSearchChange = event => {
+    this.setState({ searchInput: event.target.value });
   };
-  handleCountryChange = event => {
-    this.setState({ Country: event.target.value });
-  };
+
   getLocalWeather = async () => {
     let newLocation = await this.fetchLocation();
     let newWeather = await this.fetchWeather(newLocation);
@@ -87,7 +93,6 @@ class App extends React.Component {
 
     this.setState({ weatherData: newWeather, locationData: currentCity });
   };
-
   fetchLocation = () => {
     return new Promise(async (success, error) => {
       window.navigator.geolocation.getCurrentPosition(
@@ -105,7 +110,6 @@ class App extends React.Component {
       );
     });
   };
-
   fetchWeather = ({ lat, long }) => {
     return new Promise(async (success, error) => {
       try {
@@ -120,14 +124,28 @@ class App extends React.Component {
     });
   };
 
-  getLatLong = (City, Country) => {
+  updateWeather = (lat, long) => {
+    return new Promise(async (success, error) => {
+      try {
+        const response = await weatherData.get(`/points/${lat},${long}`);
+        const gridURL = response.data.properties.forecast;
+        const forecast = await axios.get(gridURL);
+
+        success(forecast.data.properties.periods);
+      } catch (err) {
+        error(err);
+      }
+    });
+  };
+
+  getLatLong = search => {
     return new Promise(async (success, error) => {
       try {
         const response = await addressData.get(
-          `?q=${City},${Country}&key=bf6078b1e5eb41e38e78ea3209e0817c`
+          `?q=${search}&key=bf6078b1e5eb41e38e78ea3209e0817c`
         );
 
-        success(response.data.results[0].geometry);
+        success(response);
       } catch (err) {
         error(err);
       }
@@ -141,13 +159,11 @@ class App extends React.Component {
         );
 
         success(response);
-        console.log(response);
       } catch (err) {
         error(err);
       }
     });
   };
-
   onDaySelect = async (day, night) => {
     let selectedDay = await [day, night];
     this.setState({ selectedDay: selectedDay });
