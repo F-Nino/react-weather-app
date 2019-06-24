@@ -1,7 +1,6 @@
 import React from "react";
 import axios from "axios";
 import "./App.css";
-import Button from "./Button";
 import Search from "./Search";
 import City from "./City";
 import WeatherDay from "./WeatherDay";
@@ -13,30 +12,40 @@ class App extends React.Component {
   constructor() {
     super();
     this.state = {
-      weatherData: [],
+      weatherData: null,
       locationData: [],
-      selectedDay: null
+      selectedDay: null,
+      City: "",
+      Country: "",
+      Lat: "",
+      Long: ""
     };
     this.fetchWeather = this.fetchWeather.bind(this);
     this.getLocalWeather = this.getLocalWeather.bind(this);
     this.fetchLocation = this.fetchLocation.bind(this);
     this.fetchCurrentCity = this.fetchLocation.bind(this);
     this.onDaySelect = this.onDaySelect.bind(this);
+    this.handleCityChange = this.handleCityChange.bind(this);
+    this.handleCountryChange = this.handleCountryChange.bind(this);
+    this.handleClick = this.handleClick.bind(this);
+    this.getLatLong = this.getLatLong.bind(this);
   }
 
   componentDidMount() {}
 
   render() {
-    console.log(this.state.weatherData);
     return (
       <div id="wrapper">
         <div className="ui container">
           <h1 className="ui center white aligned header"> Weather App </h1>
           <City />
           <div className="search">
-            <Search name="City" />
-            <Search name="Country" />
-            <Button label="Search Location" />
+            <Search
+              name="City"
+              handleCityChange={this.handleCityChange}
+              handleCountryChange={this.handleCountryChange}
+              handleClick={this.handleClick}
+            />
           </div>
           <div className="ui container horizontal segments">
             <WeatherDay
@@ -58,10 +67,24 @@ class App extends React.Component {
     );
   }
 
+  handleClick = async () => {
+    let searchLocation = await this.getLatLong(
+      this.state.City,
+      this.state.Country
+    );
+    this.setState({ Lat: searchLocation.lat, Long: searchLocation.lng });
+  };
+  handleCityChange = event => {
+    this.setState({ City: event.target.value });
+  };
+  handleCountryChange = event => {
+    this.setState({ Country: event.target.value });
+  };
   getLocalWeather = async () => {
     let newLocation = await this.fetchLocation();
     let newWeather = await this.fetchWeather(newLocation);
     let currentCity = await this.fetchCurrentCity(newLocation);
+
     this.setState({ weatherData: newWeather, locationData: currentCity });
   };
 
@@ -97,6 +120,19 @@ class App extends React.Component {
     });
   };
 
+  getLatLong = (City, Country) => {
+    return new Promise(async (success, error) => {
+      try {
+        const response = await addressData.get(
+          `?q=${City},${Country}&key=bf6078b1e5eb41e38e78ea3209e0817c`
+        );
+
+        success(response.data.results[0].geometry);
+      } catch (err) {
+        error(err);
+      }
+    });
+  };
   fetchCurrentCity = ({ lat, long }) => {
     return new Promise(async (success, error) => {
       try {
@@ -104,7 +140,8 @@ class App extends React.Component {
           `?q=${lat}+${long}&key=bf6078b1e5eb41e38e78ea3209e0817c`
         );
 
-        success(response.data.results[0].components);
+        success(response);
+        console.log(response);
       } catch (err) {
         error(err);
       }

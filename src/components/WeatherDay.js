@@ -7,7 +7,7 @@ class WeatherDay extends Component {
   }
 
   render() {
-    if (this.props.weatherData === undefined) {
+    if (this.props.weatherData === null) {
       return (
         <div className="spinner">
           <Spinner />
