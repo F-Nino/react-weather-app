@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/react-weather-app/static/css/main.24e3869c.chunk.css",
+    "main.js": "/react-weather-app/static/js/main.22b8a458.chunk.js",
+    "main.js.map": "/react-weather-app/static/js/main.22b8a458.chunk.js.map",
+    "runtime~main.js": "/react-weather-app/static/js/runtime~main.7e96bc80.js",
+    "runtime~main.js.map": "/react-weather-app/static/js/runtime~main.7e96bc80.js.map",
+    "static/js/2.4cfc5fbd.chunk.js": "/react-weather-app/static/js/2.4cfc5fbd.chunk.js",
+    "static/js/2.4cfc5fbd.chunk.js.map": "/react-weather-app/static/js/2.4cfc5fbd.chunk.js.map",
+    "index.html": "/react-weather-app/index.html",
+    "precache-manifest.1996f9f66b134fcf4e378111960a26eb.js": "/react-weather-app/precache-manifest.1996f9f66b134fcf4e378111960a26eb.js",
+    "service-worker.js": "/react-weather-app/service-worker.js",
+    "static/css/main.24e3869c.chunk.css.map": "/react-weather-app/static/css/main.24e3869c.chunk.css.map"
+  }
+}
